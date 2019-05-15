@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+                <button class="btn btn-run" type="submit">Run</button>
+        </div>
+    </form>
+{% endblock content %}
