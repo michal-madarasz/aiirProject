@@ -35,7 +35,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mpiBackend.apps.BlogConfig',
     'users.apps.UsersConfig',
     'crispy_forms',
 ]
