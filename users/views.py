@@ -1,5 +1,8 @@
+import os
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.files.storage import default_storage
 from django.shortcuts import render, redirect
 
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
@@ -41,3 +44,10 @@ def profile(request):
     }
 
     return render(request, 'users/profile.html', context)
+
+
+@login_required
+def file_upload(request):
+    save_path = os.path.join(settings.MEDIA_ROOT, 'uploads', request.FILES['file'])
+    path = default_storage.save(save_path, request.FILES['file'])
+    return default_storage.path(path)
