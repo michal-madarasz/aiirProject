@@ -1,5 +1,5 @@
 import os
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, TimeoutExpired
 
 from django.conf import settings
 from django.contrib import messages
@@ -59,9 +59,19 @@ def file_upload(request):
 def task(request):
     if request.method == 'POST':
         mpi = Popen(["mpirun", "-n", "3", "python3", "/home/misiek/3rok/mpi/Clustering_MPI.py"], stdout=PIPE)
-        if mpi != "":
+
+        try:
+            outs, error = mpi.communicate(timeout=15)
+        except TimeoutExpired:
+            mpi.kill()
+            outs, error = mpi.communicate()
+
+        if outs != "":
+            print(str(outs, 'utf-8'))
             messages.success(request, f'mpirun succesful')
         else:
             messages.error(request, f'mpi failure')
+    else:
+        messages.error(request, f'No POST')
 
     return render(request, 'users/task.html')
