@@ -2,6 +2,8 @@ FROM python:3.6
 
 WORKDIR /usr/src/app
 COPY requirements.txt ./
+RUN apt-get update -y && \
+	apt-get install -y gcc gfortran libopenmpi-dev openmpi-bin openmpi-common openmpi-doc binutils
 RUN pip3 install -r requirements.txt
 COPY . .
 
