@@ -5,5 +5,5 @@ from . import views
 urlpatterns = [
     path('task/', views.task, name='task'),
     path('document/', views.document, name='document'),
-    path('document/delete/(?P<delete_id>\d+)/$', views.documentDelete, name='documentDelete'),
+    path('document/delete/<int:delete_id>', views.documentDelete, name='documentDelete'),
 ]

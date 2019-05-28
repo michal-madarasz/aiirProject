@@ -10,9 +10,12 @@ from .forms import MpiParameters, DocumentForm
 @login_required
 def task(request):
     if request.method == 'POST':
-        m_form = MpiParameters(request.POST)
+        m_form = MpiParameters(request.user, request.POST)
         if m_form.is_valid():
             n_process = m_form.cleaned_data['amount_of_process']
+            document_id = m_form.cleaned_data['document_id']
+            document = Document.objects.filter(id = document_id)[0]
+            print(document.file)   
             mpi = Popen(["mpirun", "-n", n_process, "python3", "/home/misiek/3rok/mpi/Clustering_MPI.py"], stdout=PIPE)
 
             try:
@@ -36,7 +39,7 @@ def task(request):
         documents = Document.objects.filter(user = request.user)
 
     context = {
-    	'm_form': MpiParameters(),
+    	'm_form': MpiParameters(request.user),
     	'documents': documents,
     }
 
