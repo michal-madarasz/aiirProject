@@ -1,4 +1,6 @@
+numpy
 django
 django-crispy-forms
 Pillow
 mpi4py
+django-cleanup
