@@ -3,6 +3,7 @@ from subprocess import Popen, PIPE, TimeoutExpired
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+from django.conf import settings
 
 from .forms import MpiParameters, DocumentForm
 from .models import Document
@@ -16,7 +17,8 @@ def task(request):
             n_process = m_form.cleaned_data['amount_of_process']
             document_id = m_form.cleaned_data['document_id']
             document = Document.objects.filter(id=document_id)[0]
-            print(document.file)
+            document_path = os.path.join(settings.MEDIA_ROOT, document.file.name)
+            # print(document.file.name)
 
             filename = 'clustering.py'
 
@@ -24,7 +26,7 @@ def task(request):
                 if filename in files:
                     filename = os.path.join(root, filename)
 
-            mpi = Popen(['mpirun', '--allow-run-as-root', '-n', n_process, 'python3', filename], stdout=PIPE)
+            mpi = Popen(['mpirun', '--allow-run-as-root', '-n', n_process, 'python3', filename, document_path], stdout=PIPE)
 
             try:
                 outs, error = mpi.communicate(timeout=15)

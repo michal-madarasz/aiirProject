@@ -3,6 +3,7 @@ import numpy as np
 from mpi4py import MPI
 import csv
 import os
+import sys
 
 # konwencja:
 # przy zmiejszaniu tablicy klastrow, usredniony wynik zapisujemy w komorkach o nizszym indeksie, a te o wyzszym usuwamy
@@ -17,11 +18,13 @@ MPIcomm = MPI.COMM_WORLD  # zmienna sluzaca do wywolywania funkcji MPI; laczy ws
 MPIrank = MPIcomm.rank  # zmienna przechowujaca indeks danego wezla
 MPIsize = MPIcomm.size  # zmienna przechowujaca liczbe wszystkich wezlow
 
+filename = sys.argv[1]
+# print(filename)
 # nazwa input-pliku data.csv
-filename = 'data.csv'
-for root, dirs, files in os.walk('.'):
-    if filename in files:
-        filename = os.path.join(root, filename)
+# filename = 'data.csv'
+# for root, dirs, files in os.walk('.'):
+    # if filename in files:
+        # filename = os.path.join(root, filename)
 
 data_file = open(filename, 'r')
 clusters_str = list(csv.reader(data_file))

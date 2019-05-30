@@ -35,7 +35,7 @@
             {% for document in documents %}
             <tr>
               <th scope="row">{{ forloop.counter }}</th>
-              <td>{{ document.id }}</td>
+              <td>{{ document.name }}</td>
               <td>{{ document.user }}</td>
               <td>{{ document.date_created | date}}</td>
               <td> <a href={% url 'documentDelete' document.id %} class="btn btn-danger" >delete</a> </td>
