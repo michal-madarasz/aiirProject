@@ -4,9 +4,11 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.conf import settings
+from django.core.files.base import ContentFile
+from time import gmtime, strftime
 
 from .forms import MpiParameters, DocumentForm
-from .models import Document
+from .models import Document, ResultDocument
 
 
 @login_required
@@ -20,13 +22,23 @@ def task(request):
             document_path = os.path.join(settings.MEDIA_ROOT, document.file.name)
             # print(document.file.name)
 
+            # create empty file to save
+            content = ''.encode()
+            time = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
+            resultDocument = ResultDocument();
+            resultDocument.name = document.name + '_' + time
+            resultDocument.user = request.user
+            resultDocument.file.save('result.txt', ContentFile(content))
+            resultDocument.save()
+            result_document_path = os.path.join(settings.MEDIA_ROOT, resultDocument.file.name)
+
             filename = 'clustering.py'
 
             for root, dirs, files in os.walk('.'):
                 if filename in files:
                     filename = os.path.join(root, filename)
 
-            mpi = Popen(['mpirun', '--allow-run-as-root', '-n', n_process, 'python3', filename, document_path], stdout=PIPE)
+            mpi = Popen(['mpirun', '--allow-run-as-root', '-n', n_process, 'python3', filename, document_path, result_document_path], stdout=PIPE)
 
             try:
                 outs, error = mpi.communicate(timeout=15)
@@ -98,3 +110,17 @@ def documentDelete(request, delete_id):
         messages.error(request, f'It isn\'t your file.')
 
     return redirect('document')
+
+
+@login_required
+def resultDocument(request):
+    if request.user.is_superuser:
+        resultDocuments = ResultDocument.objects.all()
+    else:
+        resultDocuments = ResultDocument.objects.filter(user=request.user)
+
+    context = {
+        'resultDocuments': resultDocuments,
+    }
+
+    return render(request, 'result.html', context)
