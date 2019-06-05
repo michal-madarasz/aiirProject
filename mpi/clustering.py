@@ -20,11 +20,11 @@ MPIcomm = MPI.COMM_WORLD    # zmienna sluzaca do wywolywania funkcji MPI; laczy 
 MPIrank = MPIcomm.rank      # zmienna przechowujaca indeks danego wezla
 MPIsize = MPIcomm.size      # zmienna przechowujaca liczbe wszystkich wezlow
 
-filenameLoad = sys.argv[1]
-filenameSave = sys.argv[2]
+filename_load = sys.argv[1]
+filename_save = sys.argv[2]
 
 # nazawa input-pliku data.csv
-clusters_str = list(csv.reader(open(filenameLoad, 'r')))
+clusters_str = list(csv.reader(open(filename_load, 'r')))
 clusters = []
 clusters = [[0 for i in range(len(clusters_str[j]))] for j in range(len(clusters_str))]
 
@@ -349,7 +349,7 @@ for i in range(1, numberOfPoints):
         joins.append(join2Clusters(distances, shortestDistance[0], shortestDistance[1], clusters, numberOfClusters))
 
         # zapisujemy do pliku
-        joinsOutput = open(filenameSave, "a")
+        joinsOutput = open(filename_save, "a")
         joinsOutput.write("\n".join(map(str, joins)))
         joinsOutput.write("\n")
         joinsOutput.close()

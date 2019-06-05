@@ -1,5 +1,5 @@
 from django import forms
-from .models import Document
+from .models import Document, ResultDocument
 
 
 class MpiParameters(forms.Form):
@@ -10,7 +10,7 @@ class MpiParameters(forms.Form):
     )
     document_id = forms.ChoiceField(
         choices=[],
-        label="Choose file",
+        label='Choose file',
         initial='',
         widget=forms.Select(),
         required=True
@@ -20,11 +20,13 @@ class MpiParameters(forms.Form):
         super(MpiParameters, self).__init__(*args, **kwargs)
         if user.is_superuser:
             self.fields['document_id'] = forms.ChoiceField(
-                choices=[(o.id, str(o)) for o in Document.objects.all()]
+                choices=[(o.id, str(o)) for o in Document.objects.all()],
+                label='Choose file',
             )
         else:
             self.fields['document_id'] = forms.ChoiceField(
-                choices=[(o.id, str(o)) for o in Document.objects.filter(user=user)]
+                choices=[(o.id, str(o)) for o in Document.objects.filter(user=user)],
+                label='Choose file',
             )
 
 
@@ -32,3 +34,26 @@ class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
         fields = ['name', 'file']
+
+
+class ResultForm(forms.Form):
+    result_document_id = forms.ChoiceField(
+        label='Choose file',
+        choices=[],
+        initial='',
+        widget=forms.Select(),
+        required=True
+    )
+
+    def __init__(self, user, *args, **kwargs):
+        super(ResultForm, self).__init__(*args, **kwargs)
+        if user.is_superuser:
+            self.fields['result_document_id'] = forms.ChoiceField(
+                choices=[(o.id, str(o)) for o in ResultDocument.objects.all()],
+                label='Choose file',
+            )
+        else:
+            self.fields['result_document_id'] = forms.ChoiceField(
+                choices=[(o.id, str(o)) for o in ResultDocument.objects.filter(user=user)],
+                label='Choose file',
+            )

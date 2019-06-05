@@ -7,4 +7,5 @@ urlpatterns = [
     path('document/', views.document, name='document'),
     path('document/delete/<int:delete_id>', views.documentDelete, name='documentDelete'),
     path('result/', views.resultDocument, name='resultDocument'),
+    path('image/<int:id>', views.showimage, name='image'),
 ]
