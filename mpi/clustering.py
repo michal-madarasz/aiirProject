@@ -40,12 +40,12 @@ numberOfPoints = len(clusters)
     # [1, 0.6],[2, 1.6],[3, 2.6],[4, 3.6],[5, 4.6],
     # [9, 11],[1, 2],[3, 4],[5, 6],[7, 8]]
 
-'''numberOfPoints = 10
-clusters =  [[0,1], [1,3], [2,6], [3,10], [4,15],
-            [5,21], [6,28], [7,36], [8,45], [9,55]]'''
+#numberOfPoints = 10
+#clusters =  [[0,1], [1,3], [2,6], [3,10], [4,15],
+#            [5,21], [6,28], [7,36], [8,45], [9,55]]
 
-'''numberOfPoints = 5
-clusters = [[4,15], [3,10], [2,6], [1,3], [0,1]]'''
+#numberOfPoints = 5
+#clusters = [[4,15], [3,10], [2,6], [1,3], [0,1]]
 
 
 numberOfClusters = numberOfPoints           # wskazuje aktualna liczbe klastrow
@@ -67,6 +67,9 @@ for i in range(0, numberOfClusters):        # inicjalizacja listy list dystansow
 
 
 joins = []                                  # lista kolejnych zlaczen; wynik dzialania programu
+translationList = []                        # lista tlumaczaca numer klastra na numer, ktory bedzie interpretowany przez rysownika dendrogramu
+                                            # dendrogram zaklada, ze kazdy nowo powstaly klaster otrzymuje indeks n+1, gdzie n to indeks ostatniego zapisanego klastra
+lastClasterDendroIndex = numberOfPoints - 1 # indeks klastra o najwyzszym indeksie wedlug indeksowania dla dendrogramu
 shortestDistance = [0, 0, float('inf')]     # najkrotszy dystans zapamietany przez wszystkie wezly
 
 
@@ -321,11 +324,18 @@ def findLightestDistance(distances, numberOfClusters):
         positionInDistances = MPIcomm.recv(source=0, tag=0)
         return positionInDistances          # kazdy z wezlow zapamietuje pozycje w dystansach najlepszego wyniku
 
+def appendToJoinList(joinedClusters):
+    firstIndex = translationList[joinedClusters[0]]
+    secondIndex = translationList[joinedClusters[1]]
+    joins.append([firstIndex, secondIndex, len(joins)+1, 2])        # arg[0] - indeks klastra o nizszym indeksie
+                                                                    # arg[1] - indeks klastra o wyzszym indeksie
+                                                                    # arg[2] - wysokosc zlaczenia
+                                                                    # arg[3] - ile klastrow laczymy
 
+    # usuwamy zlaczany klaster o wyzszym indeksie z listy tlumaczen na indeksy dla dendrogramu
+    del translationList[joinedClusters[1]] #= translationList[:joinedClusters[1]] + translationList[joinedClusters[1]+1:]
 
-
-
-
+    translationList[joinedClusters[0]] = lastClasterDendroIndex + 1
 
 
 # kazdy z wespol wypisuje przypisany mu indeks
@@ -334,25 +344,19 @@ print("Rank ", MPIrank)
 # najpierw liczymy wzystkie mozliwe do wyliczenia dystanse
 countAllDistances(clusters, numberOfPoints)
 
+if MPIrank == 0:
+    for i in range(0, numberOfPoints):
+        translationList.append(i)
+
 for i in range(1, numberOfPoints):
     # szukamy najkrotszego dystansu
     shortestDistance = findLightestDistance(distances, numberOfClusters)
 
     if MPIrank == 0:
-        '''print "liczba klastrow", numberOfClusters
-        for i in range (0, numberOfClusters):
-            for j in range(0, i):
-                print i, j, '{:1f}'.format(distances[i][j])
-        print "\n"'''
 
-        # laczymy dwa najbardziej zblizone do siebie klastry
-        joins.append(join2Clusters(distances, shortestDistance[0], shortestDistance[1], clusters, numberOfClusters))
-
-        # zapisujemy do pliku
-        joinsOutput = open(filename_save, "a")
-        joinsOutput.write("\n".join(map(str, joins)))
-        joinsOutput.write("\n")
-        joinsOutput.close()
+        # laczymy dwa najbardziej zblizone do siebie klastry i inkrementujemy indeks ostatniego wpisanego do listy polaczen klastra
+        appendToJoinList(join2Clusters(distances, shortestDistance[0], shortestDistance[1], clusters, numberOfClusters))
+        lastClasterDendroIndex += 1
 
         # zapamietujemy indeks nowo utworzonego klastra (czyli jednego ze zlaczonych klastrow o nizszym indeksie)
         joinedClusterIndex = shortestDistance[1]
@@ -371,5 +375,12 @@ for i in range(1, numberOfPoints):
         else:
             countDistancesForNewCluster(distances, clusters, shortestDistance[1])
 
-if MPIrank == 0:
-    print(joins)
+# if MPIrank == 0:
+#     print(translationList)
+#     print("\n")
+#     print(joins)
+
+# zapisujemy do pliku
+joinsOutput = open(filename_save, "a")
+joinsOutput.write("\n".join(map(str, joins)))
+joinsOutput.close()

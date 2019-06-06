@@ -166,6 +166,7 @@ def showimage(request, id):
 
     matrix = np.array(tmp_array)
 
+    figure(figsize=(15, 10))
     title(result_document.name)
     dendogram = dendrogram(matrix, truncate_mode="none")
  
