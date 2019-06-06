@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="row">
+        <div class="col-2"></div>
+        <div class="col">
+            <h1>Upload file</h1>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <fieldset class="form-group">
+                        {{ d_form|crispy }}
+                </fieldset>
+                <div class="form-group">
+                        <button class="btn btn-primary" type="submit">Upload</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-2"></div>
+    </div>
+
+    <dov class="row">
+        <h1>Uploaded files</h1>
+
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Name</th>
+              <th scope="col">Owner</th>
+              <th scope="col">Creation date</th>
+              <th scope="col">Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for document in documents %}
+            <tr>
+              <th scope="row">{{ forloop.counter }}</th>
+              <td>{{ document.name }}</td>
+              <td>{{ document.user }}</td>
+              <td>{{ document.date_created | date}}</td>
+              <td> <a href={% url 'documentDelete' document.id %} class="btn btn-danger" >delete</a> </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+
+    </dov>
+
+{% endblock content %}

@@ -30,11 +30,3 @@ class ProfileUpdateForm(forms.ModelForm):
 class UploadFileForm(forms.Form):
     title = forms.CharField(max_length=50)
     file = forms.FileField()
-
-
-class MpiParameters(forms.Form):
-    amount_of_process = forms.CharField(
-        label='Amount of process',
-        max_length=5,
-        required=True,
-    )
