@@ -17,3 +17,16 @@ class Document(models.Model):
 
     def __str__(self):
         return self.name
+
+def resultDocument_directory_path(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
+    return 'resultDocument/user_{0}/{1}'.format(instance.user.id, filename)
+
+class ResultDocument(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=50, unique=True)
+    date_created = models.DateTimeField(default=timezone.now)
+    file = models.FileField(upload_to=resultDocument_directory_path)
+
+    def __str__(self):
+        return self.name
