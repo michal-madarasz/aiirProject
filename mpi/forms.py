@@ -49,11 +49,11 @@ class ResultForm(forms.Form):
         super(ResultForm, self).__init__(*args, **kwargs)
         if user.is_superuser:
             self.fields['result_document_id'] = forms.ChoiceField(
-                choices=[(o.id, str(o)) for o in ResultDocument.objects.all()],
+                choices=[(o.id, str(o)) for o in ResultDocument.objects.filter(ready=True)],
                 label='Choose file',
             )
         else:
             self.fields['result_document_id'] = forms.ChoiceField(
-                choices=[(o.id, str(o)) for o in ResultDocument.objects.filter(user=user)],
+                choices=[(o.id, str(o)) for o in ResultDocument.objects.filter(user=user, ready=True)],
                 label='Choose file',
             )

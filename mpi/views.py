@@ -1,4 +1,4 @@
-import os, io, re
+import os, io, re, json
 import numpy as np
 from subprocess import Popen, PIPE, TimeoutExpired
 from django.contrib import messages
@@ -16,6 +16,8 @@ import PIL, PIL.Image
 
 from .forms import MpiParameters, DocumentForm, ResultForm
 from .models import Document, ResultDocument
+from .tasks import *
+from background_task.models import Task
 
 
 @login_required
@@ -39,28 +41,10 @@ def task(request):
             result_document.save()
             result_document_path = os.path.join(settings.MEDIA_ROOT, result_document.file.name)
 
-            filename = 'clustering.py'
+            mpiTask(n_process, document_path, result_document_path, result_document.id)
 
-            for root, dirs, files in os.walk('.'):
-                if filename in files:
-                    filename = os.path.join(root, filename)
-
-            mpi = Popen(['mpirun', '--allow-run-as-root', '-n', n_process, 'python3', filename, document_path, result_document_path], stdout=PIPE)
-
-            try:
-                outs, error = mpi.communicate(timeout=15)
-            except TimeoutExpired:
-                mpi.kill()
-                outs, error = mpi.communicate()
-
-            if outs != '':
-                print(str(outs, 'utf-8'))
-                messages.success(request, f'mpirun succesful')
-            else:
-                messages.error(request, f'mpi failure')
+            messages.success(request, f'mpirun succesful')
             redirect('task')
-    else:
-        messages.error(request, f'No POST')
 
     if request.user.is_superuser:
         documents = Document.objects.all()
@@ -69,7 +53,8 @@ def task(request):
 
     context = {
         'm_form': MpiParameters(request.user),
-        'documents': documents,
+        # 'documents': documents,
+        'tasks': getQueue(),
     }
 
     return render(request, 'task.html', context)
@@ -131,9 +116,9 @@ def resultDocument(request):
             is_show_image = True
 
     if request.user.is_superuser:
-        result_documents = ResultDocument.objects.all()
+        result_documents = ResultDocument.objects.filter(ready=True)
     else:
-        result_documents = ResultDocument.objects.filter(user=request.user)
+        result_documents = ResultDocument.objects.filter(user=request.user, ready=True)
 
     context = {
         'rd_form': ResultForm(request.user),
@@ -182,3 +167,33 @@ def showimage(request, id):
     return HttpResponse(buffer.getvalue(), content_type="image/png")
 
 
+def getQueue():
+    tasks = Task.objects.order_by('run_at')
+    result = []
+    for task in tasks:
+        line = re.sub("[\[\] ]+|, \{\}", "", task.task_params)
+        line = line.split(',')
+        result_document = ResultDocument.objects.filter(id=int(line[3]))[0]
+        tmp_array = {
+            'id' : task.id,
+            'name' : result_document.name,
+            'n_process' : line[0],
+            'time' : task.run_at,
+            'locked_by' : task.locked_by,
+            'locked_by_pid_running' : task.locked_by_pid_running,
+        }
+        result.append(tmp_array)
+
+    return result
+
+
+@login_required
+def taskDelete(request, delete_id):
+    task = Task.objects.get(id=delete_id)
+
+    if task.delete():
+        messages.success(request, f'Task has been deleted.')
+    else:
+        messages.error(request, f'Task hasn\'t been delete.')
+
+    return redirect('task')

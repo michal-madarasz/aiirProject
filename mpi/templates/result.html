@@ -33,6 +33,8 @@
               <th scope="col">Name</th>
               <th scope="col">Owner</th>
               <th scope="col">Creation date</th>
+              <th scope="col">Nr process</th>
+              <th scope="col">Time[s]</th>
             </tr>
           </thead>
           <tbody>
@@ -42,6 +44,8 @@
               <td>{{ document.name }}</td>
               <td>{{ document.user }}</td>
               <td>{{ document.date_created | date}}</td>
+              <td>{{ document.nr_process}}</td>
+              <td>{{ document.time}}</td>
             </tr>
             {% endfor %}
           </tbody>

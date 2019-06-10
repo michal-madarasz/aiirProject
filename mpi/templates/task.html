@@ -21,5 +21,33 @@
 		<div class="col">
 			<h1>Queue</h1>
 		</div>
+		<table class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Name</th>
+              <th scope="col">Nr processes</th>
+              <th scope="col">Date</th>
+              <th scope="col">Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for task in tasks %}
+            {% if task.locked_by_pid_running != False %}
+	            {% if task.locked_by_pid_running %}
+	            	<tr style="color: green">
+	            {% else %}
+	            	<tr>
+	            {% endif %}
+		              <th scope="row">{{ forloop.counter }}</th>
+		              <td>{{ task.locked_by_pid_running }}</td>
+		              <td>{{ task.n_process }}</td>
+		              <td>{{ task.time | date:'Y-m-d H:i'}}</td>
+		              <td> <a href={% url 'taskDelete' task.id %} class="btn btn-danger" >delete</a> </td>
+	            </tr>
+	        {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
 	</div>
 {% endblock content %}
