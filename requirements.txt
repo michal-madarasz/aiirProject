@@ -6,3 +6,4 @@ mpi4py
 django-cleanup
 scipy
 matplotlib
+django-background-tasks

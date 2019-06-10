@@ -27,6 +27,9 @@ class ResultDocument(models.Model):
     name = models.CharField(max_length=50, unique=True)
     date_created = models.DateTimeField(default=timezone.now)
     file = models.FileField(upload_to=resultDocument_directory_path)
+    time = models.IntegerField(default=0)
+    nr_process = models.IntegerField(default=0)
+    ready = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

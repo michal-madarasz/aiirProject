@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'mpi.apps.MpiConfig',
     'django_cleanup',
+    'background_task',
 ]
 
 MIDDLEWARE = [
