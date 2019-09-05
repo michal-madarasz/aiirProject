@@ -2,7 +2,9 @@ pipeline {
     agent any
     stages {
         stage('run') {
-            sh 'docker-compose up'
+            steps {
+                sh 'docker-compose up'
+            }
         }
     }
     post {
