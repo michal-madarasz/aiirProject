@@ -7,3 +7,4 @@ django-cleanup
 scipy
 matplotlib
 django-background-tasks
+pep8
